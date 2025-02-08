@@ -1,6 +1,6 @@
 # API Klinik
 
-API Klinik ini menyediakan layanan untuk mengelola data pasien, dokter, jadwal, dan rekam medis di sebuah klinik. API ini memungkinkan aplikasi frontend untuk mendaftar pasien, mengelola janji temu, serta menyimpan dan mengelola data medis pasien. API ini dapat digunakan oleh aplikasi atau sistem lain yang membutuhkan integrasi dengan layanan klinik.
+API Klinik ini menyediakan layanan untuk mengelola data pasien, dokter, jadwal, rekam medis dan lainya di sebuah klinik. API ini memungkinkan aplikasi frontend untuk mendaftar pasien, mengelola janji temu, serta menyimpan dan mengelola data medis pasien. API ini dapat digunakan oleh aplikasi atau sistem lain yang membutuhkan integrasi dengan layanan klinik.
 
 ## Fitur
 
