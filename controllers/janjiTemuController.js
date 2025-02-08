@@ -1,17 +1,19 @@
 // controllers/janjiTemuController.js
 const JanjiTemu = require("../models/JanjiTemu");
+const { janjiTemuSchema, idSchema } = require("../validations/janjiTemuValidation");
 
 const janjiTemuController = {
   create: async (req, res) => {
-    const { id_pasien, id_dokter, tanggal, waktu, keluhan } = req.body;
-
-    // Validasi input
-    if (!id_pasien || !id_dokter || !tanggal || !waktu || !keluhan) {
+    // Validasi input menggunakan Joi
+    const { error } = janjiTemuSchema.validate(req.body);
+    if (error) {
       return res.status(400).json({
         success: false,
-        message: "Semua field harus diisi.",
+        message: error.details.map((detail) => detail.message).join(", "),
       });
     }
+
+    const { id_pasien, id_dokter, tanggal, waktu, keluhan } = req.body;
 
     try {
       const janjiTemuId = await JanjiTemu.create(id_pasien, id_dokter, tanggal, waktu, keluhan);
@@ -46,6 +48,14 @@ const janjiTemuController = {
   },
 
   getById: async (req, res) => {
+    const { error } = idSchema.validate(req.params.id);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details.map((detail) => detail.message).join(", "),
+      });
+    }
+
     const id = req.params.id;
 
     try {
@@ -70,16 +80,26 @@ const janjiTemuController = {
   },
 
   update: async (req, res) => {
-    const id = req.params.id;
-    const { id_pasien, id_dokter, tanggal, waktu, keluhan, status } = req.body;
-
-    // Validasi input
-    if (!id_pasien || !id_dokter || !tanggal || !waktu || !keluhan || !status) {
+    // Validasi ID
+    const { error: idError } = idSchema.validate(req.params.id);
+    if (idError) {
       return res.status(400).json({
         success: false,
-        message: "Semua field harus diisi.",
+        message: idError.details.map((detail) => detail.message).join(", "),
       });
     }
+
+    // Validasi body
+    const { error: bodyError } = janjiTemuSchema.validate(req.body);
+    if (bodyError) {
+      return res.status(400).json({
+        success: false,
+        message: bodyError.details.map((detail) => detail.message).join(", "),
+      });
+    }
+
+    const id = req.params.id;
+    const { id_pasien, id_dokter, tanggal, waktu, keluhan, status } = req.body;
 
     try {
       const affectedRows = await JanjiTemu.update(id, id_pasien, id_dokter, tanggal, waktu, keluhan, status);
@@ -103,6 +123,14 @@ const janjiTemuController = {
   },
 
   delete: async (req, res) => {
+    const { error } = idSchema.validate(req.params.id);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details.map((detail) => detail.message).join(", "),
+      });
+    }
+
     const id = req.params.id;
 
     try {

@@ -1,17 +1,19 @@
 // controllers/spesialisasiController.js
 const Spesialisasi = require("../models/Spesialisasi");
+const { spesialisasiSchema, idSchema } = require("../validations/spesialisasiValidation");
 
 const spesialisasiController = {
   create: async (req, res) => {
-    const { nama_spesialisasi } = req.body;
-
-    // Validasi input
-    if (!nama_spesialisasi) {
+    // Validasi input menggunakan Joi
+    const { error } = spesialisasiSchema.validate(req.body);
+    if (error) {
       return res.status(400).json({
         success: false,
-        message: "Nama spesialisasi harus diisi.",
+        message: error.details.map((detail) => detail.message).join(", "),
       });
     }
+
+    const { nama_spesialisasi } = req.body;
 
     try {
       const spesialisasiId = await Spesialisasi.create(nama_spesialisasi);
@@ -46,6 +48,14 @@ const spesialisasiController = {
   },
 
   getById: async (req, res) => {
+    const { error } = idSchema.validate(req.params.id);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details.map((detail) => detail.message).join(", "),
+      });
+    }
+
     const id = req.params.id;
 
     try {
@@ -70,16 +80,26 @@ const spesialisasiController = {
   },
 
   update: async (req, res) => {
-    const id = req.params.id;
-    const { nama_spesialisasi } = req.body;
-
-    // Validasi input
-    if (!nama_spesialisasi) {
+    // Validasi ID
+    const { error: idError } = idSchema.validate(req.params.id);
+    if (idError) {
       return res.status(400).json({
         success: false,
-        message: "Nama spesialisasi harus diisi.",
+        message: idError.details.map((detail) => detail.message).join(", "),
       });
     }
+
+    // Validasi body
+    const { error: bodyError } = spesialisasiSchema.validate(req.body);
+    if (bodyError) {
+      return res.status(400).json({
+        success: false,
+        message: bodyError.details.map((detail) => detail.message).join(", "),
+      });
+    }
+
+    const id = req.params.id;
+    const { nama_spesialisasi } = req.body;
 
     try {
       const affectedRows = await Spesialisasi.update(id, nama_spesialisasi);
@@ -103,6 +123,14 @@ const spesialisasiController = {
   },
 
   delete: async (req, res) => {
+    const { error } = idSchema.validate(req.params.id);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details.map((detail) => detail.message).join(", "),
+      });
+    }
+
     const id = req.params.id;
 
     try {

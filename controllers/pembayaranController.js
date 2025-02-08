@@ -1,16 +1,19 @@
 // controllers/pembayaranController.js
 const Pembayaran = require("../models/Pembayaran");
+const { pembayaranSchema, idSchema } = require("../validations/pembayaranValidation");
 
 const pembayaranController = {
   create: async (req, res) => {
-    const { id_janji_temu, jumlah, metode_pembayaran, status } = req.body;
-
-    if (!id_janji_temu || !jumlah || !metode_pembayaran || !status) {
+    // Validasi input menggunakan Joi
+    const { error } = pembayaranSchema.validate(req.body);
+    if (error) {
       return res.status(400).json({
         success: false,
-        message: "Semua field harus diisi.",
+        message: error.details.map((detail) => detail.message).join(", "),
       });
     }
+
+    const { id_janji_temu, jumlah, metode_pembayaran, status } = req.body;
 
     try {
       const pembayaranId = await Pembayaran.create(id_janji_temu, jumlah, metode_pembayaran, status);
@@ -45,6 +48,14 @@ const pembayaranController = {
   },
 
   getById: async (req, res) => {
+    const { error } = idSchema.validate(req.params.id);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details.map((detail) => detail.message).join(", "),
+      });
+    }
+
     const id = req.params.id;
 
     try {
@@ -69,15 +80,26 @@ const pembayaranController = {
   },
 
   update: async (req, res) => {
-    const id = req.params.id;
-    const { id_janji_temu, jumlah, metode_pembayaran, status } = req.body;
-
-    if (!id_janji_temu || !jumlah || !metode_pembayaran || !status) {
+    // Validasi ID
+    const { error: idError } = idSchema.validate(req.params.id);
+    if (idError) {
       return res.status(400).json({
         success: false,
-        message: "Semua field harus diisi.",
+        message: idError.details.map((detail) => detail.message).join(", "),
       });
     }
+
+    // Validasi body
+    const { error: bodyError } = pembayaranSchema.validate(req.body);
+    if (bodyError) {
+      return res.status(400).json({
+        success: false,
+        message: bodyError.details.map((detail) => detail.message).join(", "),
+      });
+    }
+
+    const id = req.params.id;
+    const { id_janji_temu, jumlah, metode_pembayaran, status } = req.body;
 
     try {
       const affectedRows = await Pembayaran.update(id, id_janji_temu, jumlah, metode_pembayaran, status);
@@ -101,6 +123,14 @@ const pembayaranController = {
   },
 
   delete: async (req, res) => {
+    const { error } = idSchema.validate(req.params.id);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details.map((detail) => detail.message).join(", "),
+      });
+    }
+
     const id = req.params.id;
 
     try {

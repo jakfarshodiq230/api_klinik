@@ -1,16 +1,19 @@
 // controllers/rekamMedisController.js
 const RekamMedis = require("../models/RekamMedis");
+const { rekamMedisSchema, idSchema } = require("../validations/rekamMedisValidation");
 
 const rekamMedisController = {
   create: async (req, res) => {
-    const { id_pasien, id_dokter, diagnosa, resep, catatan } = req.body;
-
-    if (!id_pasien || !id_dokter || !diagnosa || !resep || !catatan) {
+    // Validasi input menggunakan Joi
+    const { error } = rekamMedisSchema.validate(req.body);
+    if (error) {
       return res.status(400).json({
         success: false,
-        message: "Semua field harus diisi.",
+        message: error.details.map((detail) => detail.message).join(", "),
       });
     }
+
+    const { id_pasien, id_dokter, diagnosa, resep, catatan } = req.body;
 
     try {
       const rekamMedisId = await RekamMedis.create(id_pasien, id_dokter, diagnosa, resep, catatan);
@@ -45,6 +48,14 @@ const rekamMedisController = {
   },
 
   getById: async (req, res) => {
+    const { error } = idSchema.validate(req.params.id);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details.map((detail) => detail.message).join(", "),
+      });
+    }
+
     const id = req.params.id;
 
     try {
@@ -69,15 +80,26 @@ const rekamMedisController = {
   },
 
   update: async (req, res) => {
-    const id = req.params.id;
-    const { id_pasien, id_dokter, diagnosa, resep, catatan } = req.body;
-
-    if (!id_pasien || !id_dokter || !diagnosa || !resep || !catatan) {
+    // Validasi ID
+    const { error: idError } = idSchema.validate(req.params.id);
+    if (idError) {
       return res.status(400).json({
         success: false,
-        message: "Semua field harus diisi.",
+        message: idError.details.map((detail) => detail.message).join(", "),
       });
     }
+
+    // Validasi body
+    const { error: bodyError } = rekamMedisSchema.validate(req.body);
+    if (bodyError) {
+      return res.status(400).json({
+        success: false,
+        message: bodyError.details.map((detail) => detail.message).join(", "),
+      });
+    }
+
+    const id = req.params.id;
+    const { id_pasien, id_dokter, diagnosa, resep, catatan } = req.body;
 
     try {
       const affectedRows = await RekamMedis.update(id, id_pasien, id_dokter, diagnosa, resep, catatan);
@@ -101,6 +123,14 @@ const rekamMedisController = {
   },
 
   delete: async (req, res) => {
+    const { error } = idSchema.validate(req.params.id);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details.map((detail) => detail.message).join(", "),
+      });
+    }
+
     const id = req.params.id;
 
     try {
