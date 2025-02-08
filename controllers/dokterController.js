@@ -1,17 +1,19 @@
 // controllers/dokterController.js
 const Dokter = require("../models/Dokter");
+const { dokterSchema, idSchema } = require("../validations/dokterValidation");
 
 const dokterController = {
   create: async (req, res) => {
-    const { nama, id_spesialisasi, no_telepon, email } = req.body;
-
-    // Validasi input
-    if (!nama || !id_spesialisasi || !no_telepon || !email) {
+    // Validasi input menggunakan Joi
+    const { error } = dokterSchema.validate(req.body);
+    if (error) {
       return res.status(400).json({
         success: false,
-        message: "Semua field harus diisi.",
+        message: error.details.map((detail) => detail.message).join(", "),
       });
     }
+
+    const { nama, id_spesialisasi, no_telepon, email } = req.body;
 
     try {
       const dokterId = await Dokter.create(nama, id_spesialisasi, no_telepon, email);
@@ -46,6 +48,14 @@ const dokterController = {
   },
 
   getById: async (req, res) => {
+    const { error } = idSchema.validate(req.params.id);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details.map((detail) => detail.message).join(", "),
+      });
+    }
+
     const id = req.params.id;
 
     try {
@@ -70,16 +80,26 @@ const dokterController = {
   },
 
   update: async (req, res) => {
-    const id = req.params.id;
-    const { nama, id_spesialisasi, no_telepon, email } = req.body;
-
-    // Validasi input
-    if (!nama || !id_spesialisasi || !no_telepon || !email) {
+    // Validasi ID
+    const { error: idError } = idSchema.validate(req.params.id);
+    if (idError) {
       return res.status(400).json({
         success: false,
-        message: "Semua field harus diisi.",
+        message: idError.details.map((detail) => detail.message).join(", "),
       });
     }
+
+    // Validasi body
+    const { error: bodyError } = dokterSchema.validate(req.body);
+    if (bodyError) {
+      return res.status(400).json({
+        success: false,
+        message: bodyError.details.map((detail) => detail.message).join(", "),
+      });
+    }
+
+    const id = req.params.id;
+    const { nama, id_spesialisasi, no_telepon, email } = req.body;
 
     try {
       const affectedRows = await Dokter.update(id, nama, id_spesialisasi, no_telepon, email);
@@ -103,6 +123,14 @@ const dokterController = {
   },
 
   delete: async (req, res) => {
+    const { error } = idSchema.validate(req.params.id);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details.map((detail) => detail.message).join(", "),
+      });
+    }
+
     const id = req.params.id;
 
     try {
